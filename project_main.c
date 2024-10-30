@@ -51,6 +51,21 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
     I2C_Handle      i2c;
     I2C_Params      i2cParams;
 
+    // Muuttuja i2c-väylä
+    I2C_Transaction i2cMessage;
+
+    //Alustetaan i2c -väylä
+    I2C_Params_init(&i2cParams);
+    i2cParams.bitRate = I2C_400kHz;
+
+    // Avataam yhteys 
+    i2c = I2C_open(Board_I2C_TMP, &i2cParams);
+    if (i2c == NULL) {
+        System_abort("Error Initializing I2C\n");
+    }
+
+    
+
     while (1) {
 
         // Just for sanity check for exercise, you can comment this out
