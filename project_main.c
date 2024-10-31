@@ -51,11 +51,34 @@ void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
 /* Task Functions */
 Void uartTaskFxn(UArg arg0, UArg arg1) {
 
+    char msg[50];
+
+    UART_Handle uart;
+    UART_Params uartParams;
+
+    UART_Params_init(&uartParams);
+
+    uartParams.writeDataMode = UART_DATA_TEXT;
+    uartParams.readDataMode = UART_DATA_TEXT;
+    uartParams.readEcho = UART_ECHO_OFF;
+    uartParams.readMode = UART_MODE_BLOCKING;
+    uartParams.baudRate = 9600;
+    uartParams.dataLength = UART_LEN_8;
+    uartParams.parityType = UART_PAR_NONE;
+    uartParams.stopBits = UART_STOP_ONE;
+
+    uart = UART_open(Board_UART0, &uartParams);
+    if (uart = NULL)
+    {
+        System:abort("Error opening the UART");
+    }
 
     while (1) {
         // Just for sanity check for exercise, you can comment this out
         System_printf("uartTask\n");
         System_flush();
+
+        
 
         // Once per second, you can modify this
         Task_sleep(1000000 / Clock_tickPeriod);
