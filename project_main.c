@@ -18,7 +18,7 @@
 
 /* Board Header files */
 #include "Board.h"
-#include "sensors/opt3001.h"
+#include "sensors/mpu9250.h"
 
 /* Task */
 #define STACKSIZE 2048
