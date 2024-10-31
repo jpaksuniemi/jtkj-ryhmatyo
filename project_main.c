@@ -44,6 +44,8 @@ Char uartTaskStack[STACKSIZE];
 enum state { WAITING=1, DATA_READY };
 enum state programState = WAITING;
 
+float x1, y1, z1, x2, y2, z2;
+
 void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
 
 }

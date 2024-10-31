@@ -21,6 +21,7 @@
 #define STACKSIZE 2048
 Char taskStack[STACKSIZE];
 
+
 // MPU power pin global variables
 static PIN_Handle hMpuPin;
 static PIN_State  MpuPinState;
