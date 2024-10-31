@@ -80,7 +80,8 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
         System_printf("uartTask\n");
         System_flush();
 
-        
+        sprintf(msg, "ax:%.2f,ay:%.2f,az:%.2f,gx:%.2f,gy:%.2f,gz:%.2f", x1, y1, z1, x2, y2, z2);
+        UART_write(uart, msg, strlen(msg));
 
         // Once per second, you can modify this
         Task_sleep(1000000 / Clock_tickPeriod);
@@ -88,8 +89,6 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
 }
 
 Void sensorTaskFxn(UArg arg0, UArg arg1) {
-
-    float ax, ay, az, gx, gy, gz;
 
     I2C_Handle      i2c;
     I2C_Params      i2cParams;
@@ -108,13 +107,13 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
     }
     
 
-    
-
     while (1) {
 
         // Just for sanity check for exercise, you can comment this out
         System_printf("sensorTask\n");
         System_flush();
+        
+        void mpu9250_get_data(&i2c, &x1,&y1,&z1,&x2,&y2,&z2);
 
         // Once per second, you can modify this
         Task_sleep(1000000 / Clock_tickPeriod);
