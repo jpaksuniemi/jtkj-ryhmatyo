@@ -90,21 +90,37 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
 
 Void sensorTaskFxn(UArg arg0, UArg arg1) {
 
-    I2C_Handle      i2c;
-    I2C_Params      i2cParams;
+    I2C_Handle      i2cMPU;
+    I2C_Params      i2cMPUParams;
 
-    // Muuttuja i2c-väylä
-    I2C_Transaction i2cMessage;
+    I2C_Params_init(&i2cMPUParams);
+    i2cMPUParams.bitRate = I2C_400kHz;
+	// Note the different configuration below
+    i2cMPUParams.custom = (uintptr_t)&i2cMPUCfg;
 
-    //Alustetaan i2c -väylä
-    I2C_Params_init(&i2cParams);
-    i2cParams.bitRate = I2C_400kHz;
+    // MPU power on
+    PIN_setOutputValue(hMpuPin,Board_MPU_POWER, Board_MPU_POWER_ON);
 
-    // Avataam yhteys 
-    i2c = I2C_open(Board_I2C_TMP, &i2cParams);
-    if (i2c == NULL) {
-        System_abort("Error Initializing I2C\n");
+    // Wait 100ms for the MPU sensor to power up
+	Task_sleep(100000 / Clock_tickPeriod);
+    System_printf("MPU9250: Power ON\n");
+    System_flush();
+
+    // MPU open i2c
+    i2cMPU = I2C_open(Board_I2C, &i2cMPUParams);
+    if (i2cMPU == NULL) {
+        System_abort("Error Initializing I2CMPU\n");
     }
+
+    // MPU setup and calibration
+	System_printf("MPU9250: Setup and calibration...\n");
+	System_flush();
+
+	mpu9250_setup(&i2cMPU);
+
+	System_printf("MPU9250: Setup and calibration OK\n");
+	System_flush();
+
     
 
     while (1) {
@@ -113,7 +129,7 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
         System_printf("sensorTask\n");
         System_flush();
         
-        void mpu9250_get_data(&i2c, &x1,&y1,&z1,&x2,&y2,&z2);
+        void mpu9250_get_data(&i2cMPU, &x1,&y1,&z1,&x2,&y2,&z2);
 
         // Once per second, you can modify this
         Task_sleep(1000000 / Clock_tickPeriod);
@@ -130,6 +146,8 @@ Int main(void) {
 
     // Initialize board
     Board_initGeneral();
+    Board_initI2C();
+    Board_initUART();
 
     /* Task */
     Task_Params_init(&sensorTaskParams);
