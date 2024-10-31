@@ -12,6 +12,7 @@
 #include <ti/drivers/PIN.h>
 #include <ti/drivers/pin/PINCC26XX.h>
 #include <ti/drivers/I2C.h>
+#include <ti/drivers/i2c/I2CCC26XX.h>
 #include <ti/drivers/Power.h>
 #include <ti/drivers/power/PowerCC26XX.h>
 #include <ti/drivers/UART.h>
@@ -21,7 +22,7 @@
 #include "sensors/mpu9250.h"
 
 // MPU power pin global variables
-static PIN_Handle hMpuPim;
+static PIN_Handle hMpuPin;
 static PIN_State MpuPinState;
 
 // MPU power pin
@@ -53,7 +54,7 @@ void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
 /* Task Functions */
 Void uartTaskFxn(UArg arg0, UArg arg1) {
 
-    char msg[50];
+    char msg[80];
 
     UART_Handle uart;
     UART_Params uartParams;
@@ -70,9 +71,9 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
     uartParams.stopBits = UART_STOP_ONE;
 
     uart = UART_open(Board_UART0, &uartParams);
-    if (uart = NULL)
+    if (uart == NULL)
     {
-        System:abort("Error opening the UART");
+        System_abort("Error opening the UART");
     }
 
     while (1) {
@@ -80,11 +81,11 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
         System_printf("uartTask\n");
         System_flush();
 
-        sprintf(msg, "ax:%.2f,ay:%.2f,az:%.2f,gx:%.2f,gy:%.2f,gz:%.2f", x1, y1, z1, x2, y2, z2);
+        sprintf(msg, "ax:%5.2f,ay:%5.2f,az:%5.2f,gx:%5.2f,gy:%5.2f,gz:%5.2f\n\r", x1, y1, z1, x2, y2, z2);
         UART_write(uart, msg, strlen(msg));
 
         // Once per second, you can modify this
-        Task_sleep(1000000 / Clock_tickPeriod);
+        Task_sleep(200000 / Clock_tickPeriod);
     }
 }
 
@@ -129,10 +130,10 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
         System_printf("sensorTask\n");
         System_flush();
         
-        void mpu9250_get_data(&i2cMPU, &x1,&y1,&z1,&x2,&y2,&z2);
+        mpu9250_get_data(&i2cMPU, &x1,&y1,&z1,&x2,&y2,&z2);
 
         // Once per second, you can modify this
-        Task_sleep(1000000 / Clock_tickPeriod);
+        Task_sleep(200000 / Clock_tickPeriod);
     }
 }
 
@@ -154,7 +155,6 @@ Int main(void) {
     if (hMpuPin == NULL) {
     	System_abort("Pin open failed!");
     }
-
     /* Task */
     Task_Params_init(&sensorTaskParams);
     sensorTaskParams.stackSize = STACKSIZE;
