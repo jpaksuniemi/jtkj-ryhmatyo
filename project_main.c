@@ -131,6 +131,12 @@ Int main(void) {
     // Initialize board
     Board_initGeneral();
 
+    // virtapinnin käyttöönotto
+    hMpuPin = PIN_open(&MpuPinState, MpuPinConfig);
+    if (hMpuPin == NULL) {
+    	System_abort("Pin open failed!");
+    }
+
     /* Task */
     Task_Params_init(&sensorTaskParams);
     sensorTaskParams.stackSize = STACKSIZE;
