@@ -1,0 +1,8 @@
+Debug
+*.obj
+*.d
+*.opt
+*.cfg
+*.mk
+*.prefs
+*.aem3
