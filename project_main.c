@@ -149,6 +149,12 @@ Int main(void) {
     Board_initI2C();
     Board_initUART();
 
+    // virtapinnin käyttöönotto
+    hMpuPin = PIN_open(&MpuPinState, MpuPinConfig);
+    if (hMpuPin == NULL) {
+    	System_abort("Pin open failed!");
+    }
+
     /* Task */
     Task_Params_init(&sensorTaskParams);
     sensorTaskParams.stackSize = STACKSIZE;
