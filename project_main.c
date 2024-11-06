@@ -155,6 +155,27 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
             System_flush();
             
             mpu9250_get_data(&i2cMPU, &x1,&y1,&z1,&x2,&y2,&z2);
+            
+            while programState == INTERPRETING{
+            if (spaces => 3){
+                programState = MSG_SEND;
+            }
+            elif (DOT){
+                message[i] = ".";
+                spaces = 0;
+                i++;
+            }
+            elif (DASH){
+                message[i] = "-";
+                spaces = 0;
+                i++;
+            }
+            elif(SPACE){
+                message[i] = " ";
+                spaces++;
+                i++;
+            }
+}
 
             // Once per second, you can modify this
             Task_sleep(200000 / Clock_tickPeriod);
