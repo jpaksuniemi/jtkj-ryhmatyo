@@ -24,8 +24,10 @@
 // MPU power pin global variables
 static PIN_Handle hMpuPin;
 static PIN_Handle buttonHandle;
+static PIN_Handle ledHandle;
 static PIN_State buttonState;
 static PIN_State MpuPinState;
+static PIN_State ledState;
 
 // Pin configuration
 PIN_Config buttonConfig[] = {
