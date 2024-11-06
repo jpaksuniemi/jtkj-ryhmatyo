@@ -39,6 +39,13 @@ static PIN_Config MpuPinConfig[] = {
     PIN_TERMINATE
 };
 
+// The constant Board_LED0 corresponds to one of the LEDs
+PIN_Config ledConfig[] = {
+   Board_LED0 | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL | PIN_DRVSTR_MAX, 
+   PIN_TERMINATE // The configuration table is always terminated with this constant
+};
+
+
 // MPU uses its own I2C interface
 static const I2CCC26XX_I2CPinCfg i2cMPUCfg = {
     .pinSDA = Board_I2C0_SDA1,
@@ -60,6 +67,7 @@ void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
     pinValue =  !pinValue;
     PIN_setOutputValue( ledHandle, Board_LED0, pinValue );
     System_printf("Button pressed.");
+    System_flush();
 }
 
 /* Task Functions */
@@ -174,6 +182,11 @@ Int main(void) {
     sensorTaskHandle = Task_create(sensorTaskFxn, &sensorTaskParams, NULL);
     if (sensorTaskHandle == NULL) {
         System_abort("Task create failed!");
+    }
+
+    ledHandle = PIN_open(&ledState, ledConfig);
+    if(!ledHandle) {
+        System_abort("Error initializing LED pins\n");
     }
 
     // Enable the pins for use in the program
