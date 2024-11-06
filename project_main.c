@@ -57,7 +57,9 @@ static const I2CCC26XX_I2CPinCfg i2cMPUCfg = {
 Char sensorTaskStack[STACKSIZE];
 Char uartTaskStack[STACKSIZE];
 
-enum state { WAITING=1, DATA_READY };
+enum state { WAITING=1,
+    INTERPRETING
+};
 enum state programState = WAITING;
 
 float x1, y1, z1, x2, y2, z2;
@@ -144,15 +146,17 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
     
 
     while (1) {
+        if (programState == INTERPRETING)
+        {
+            // Just for sanity check for exercise, you can comment this out
+            System_printf("sensorTask\n");
+            System_flush();
+            
+            mpu9250_get_data(&i2cMPU, &x1,&y1,&z1,&x2,&y2,&z2);
 
-        // Just for sanity check for exercise, you can comment this out
-        System_printf("sensorTask\n");
-        System_flush();
-        
-        mpu9250_get_data(&i2cMPU, &x1,&y1,&z1,&x2,&y2,&z2);
-
-        // Once per second, you can modify this
-        Task_sleep(200000 / Clock_tickPeriod);
+            // Once per second, you can modify this
+            Task_sleep(200000 / Clock_tickPeriod);
+        }
     }
 }
 
