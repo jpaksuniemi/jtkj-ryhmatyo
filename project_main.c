@@ -66,10 +66,13 @@ enum state programState = WAITING;
 
 float x1, y1, z1, x2, y2, z2;
 
+char message[128];
+
 void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
     uint_t pinValue = PIN_getOutputValue( Board_LED0 );
     pinValue =  !pinValue;
     PIN_setOutputValue( ledHandle, Board_LED0, pinValue );
+    programState = INTERPRETING;
     System_printf("Button pressed.");
     System_flush();
 }
@@ -106,6 +109,7 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
 
         sprintf(msg, "ax:%5.2f,ay:%5.2f,az:%5.2f,gx:%5.2f,gy:%5.2f,gz:%5.2f\n\r", x1, y1, z1, x2, y2, z2);
         UART_write(uart, msg, strlen(msg));
+        UART_write(uart, message, strlen(message));
 
         // Once per second, you can modify this
         Task_sleep(200000 / Clock_tickPeriod);
@@ -161,25 +165,33 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
 void interpret(I2C_Handle *i2cMPU) {
     
     while (programState == INTERPRETING){
-    mpu9250_get_data(&i2cMPU, &x1,&y1,&z1,&x2,&y2,&z2);
-    if (spaces => 3){
-        programState = MSG_SEND;
+    mpu9250_get_data(i2cMPU, &x1,&y1,&z1,&x2,&y2,&z2);
+    int spaces = 0;
+    int i = 0;
+    if (spaces >= 3){
+        programState = INTERPRETING;
     }
-    else if (DOT){
-        message[i] = ".";
+    else if (x2 > 200.0){
+        message[i] = '.';
         spaces = 0;
         i++;
     }
-    else if (DASH){
-        message[i] = "-";
+    else if (y2 > 200.0){
+        message[i] = '-';
         spaces = 0;
         i++;
     }
-    else if(SPACE){
-        message[i] = " ";
+    else if(NULL){
+        message[i] = ' ';
         spaces++;
         i++;
     }
+    if (i % 10 == 0)
+    {
+        System_printf(sendableMessage);
+        System_flush();
+    }
+    
     // 0.2s sleep
     Task_sleep(200000 / Clock_tickPeriod);
     }
