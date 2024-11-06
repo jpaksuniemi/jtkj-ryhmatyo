@@ -153,43 +153,45 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
             // Just for sanity check for exercise, you can comment this out
             System_printf("sensorTask\n");
             System_flush();
-            
-            mpu9250_get_data(&i2cMPU, &x1,&y1,&z1,&x2,&y2,&z2);
-            
-            while (programState == INTERPRETING){
-            if (spaces => 3){
-                programState = MSG_SEND;
-            }
-            else if (DOT){
-                message[i] = ".";
-                spaces = 0;
-                i++;
-            }
-            else if (DASH){
-                message[i] = "-";
-                spaces = 0;
-                i++;
-            }
-            else if(SPACE){
-                message[i] = " ";
-                spaces++;
-                i++;
-            }
-}
-
-            // Once per second, you can modify this
-            Task_sleep(200000 / Clock_tickPeriod);
+            interpret(&i2cMPU);
         }
     }
 }
 
-Int main(void) {
+void interpret(I2C_Handle *i2cMPU)
+    
+    while (programState == INTERPRETING){
+    mpu9250_get_data(&i2cMPU, &x1,&y1,&z1,&x2,&y2,&z2);
+    if (spaces => 3){
+        programState = MSG_SEND;
+    }
+    else if (DOT){
+        message[i] = ".";
+        spaces = 0;
+        i++;
+    }
+    else if (DASH){
+        message[i] = "-";
+        spaces = 0;
+        i++;
+    }
+    else if(SPACE){
+        message[i] = " ";
+        spaces++;
+        i++;
+    }
+    // 0.2s sleep
+    Task_sleep(200000 / Clock_tickPeriod);
+    }
+}
+
+    Int main(void) {
 
     // Task variables
     Task_Handle sensorTaskHandle;
     Task_Params sensorTaskParams;
     Task_Handle uartTaskHandle;
-    Task_Params uartTaskParams;
+        Task_Params uartTaskParams;
 
     // Initialize board
     Board_initGeneral();
