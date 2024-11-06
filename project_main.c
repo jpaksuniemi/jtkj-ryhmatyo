@@ -156,21 +156,21 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
             
             mpu9250_get_data(&i2cMPU, &x1,&y1,&z1,&x2,&y2,&z2);
             
-            while programState == INTERPRETING{
+            while (programState == INTERPRETING){
             if (spaces => 3){
                 programState = MSG_SEND;
             }
-            elif (DOT){
+            else if (DOT){
                 message[i] = ".";
                 spaces = 0;
                 i++;
             }
-            elif (DASH){
+            else if (DASH){
                 message[i] = "-";
                 spaces = 0;
                 i++;
             }
-            elif(SPACE){
+            else if(SPACE){
                 message[i] = " ";
                 spaces++;
                 i++;
