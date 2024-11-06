@@ -48,7 +48,10 @@ enum state programState = WAITING;
 float x1, y1, z1, x2, y2, z2;
 
 void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
-
+    uint_t pinValue = PIN_getOutputValue( Board_LED0 );
+    pinValue =  !pinValue;
+    PIN_setOutputValue( ledHandle, Board_LED0, pinValue );
+    System_printf("Button pressed.");
 }
 
 /* Task Functions */
