@@ -158,7 +158,7 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
     }
 }
 
-void interpret(I2C_Handle *i2cMPU)
+void interpret(I2C_Handle *i2cMPU) {
     
     while (programState == INTERPRETING){
     mpu9250_get_data(&i2cMPU, &x1,&y1,&z1,&x2,&y2,&z2);
