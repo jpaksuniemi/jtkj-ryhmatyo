@@ -23,7 +23,15 @@
 
 // MPU power pin global variables
 static PIN_Handle hMpuPin;
+static PIN_Handle buttonHandle;
+static PIN_State buttonState;
 static PIN_State MpuPinState;
+
+// Pin configuration
+PIN_Config buttonConfig[] = {
+   Board_BUTTON0  | PIN_INPUT_EN | PIN_PULLUP | PIN_IRQ_POSEDGE,
+   PIN_TERMINATE 
+};
 
 // MPU power pin
 static PIN_Config MpuPinConfig[] = {
@@ -163,6 +171,15 @@ Int main(void) {
     sensorTaskHandle = Task_create(sensorTaskFxn, &sensorTaskParams, NULL);
     if (sensorTaskHandle == NULL) {
         System_abort("Task create failed!");
+    }
+
+    // Enable the pins for use in the program
+    buttonHandle = PIN_open(&buttonState, buttonConfig);
+    if(!buttonHandle) {
+        System_abort("Error initializing button pins\n");
+    }
+    if (PIN_registerIntCb(buttonHandle, &buttonFxn) != 0) {
+        System_abort("Error registering button callback function");
     }
 
     Task_Params_init(&uartTaskParams);
