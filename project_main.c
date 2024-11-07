@@ -203,7 +203,7 @@ void interpret(I2C_Handle *i2cMPU) {
     Task_Handle sensorTaskHandle;
     Task_Params sensorTaskParams;
     Task_Handle uartTaskHandle;
-        Task_Params uartTaskParams;
+    Task_Params uartTaskParams;
 
     // Initialize board
     Board_initGeneral();
