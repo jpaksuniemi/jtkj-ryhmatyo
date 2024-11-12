@@ -146,6 +146,20 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
     }
 }
 
+void printMessage(char* message){
+
+    for(int i = 0; message[i] != '\0'; i++){
+        if(message[i] == '.'){
+           
+        }
+        else if(message[i] == '-'){
+
+        }else {
+
+        }
+    }
+}
+
 Void sensorTaskFxn(UArg arg0, UArg arg1) {
 
     I2C_Handle      i2cMPU;
