@@ -36,12 +36,12 @@ static PIN_State buzzerState;
 
 // Pin configuration
 PIN_Config buttonConfig[] = {
-   Board_BUTTON0  | PIN_INPUT_EN | PIN_PULLUP | PIN_IRQ_POSEDGE,
+   Board_BUTTON0  | PIN_INPUT_EN | PIN_PULLUP | PIN_IRQ_NEGEDGE,
    PIN_TERMINATE 
 };
 
 PIN_Config button2Config[] = {
-   Board_BUTTON1  | PIN_INPUT_EN | PIN_PULLUP | PIN_IRQ_POSEDGE,
+   Board_BUTTON1  | PIN_INPUT_EN | PIN_PULLUP | PIN_IRQ_NEGEDGE,
    PIN_TERMINATE 
 };
 
@@ -83,9 +83,8 @@ float x1, y1, z1, x2, y2, z2;
 
 int hz = 5000;
 
-char message[128];
+char message[1028];
 
-/*
 void button2Fxn(PIN_Handle handle, PIN_Id pinId) {
     if (5000 == hz)
     {
@@ -98,13 +97,12 @@ void button2Fxn(PIN_Handle handle, PIN_Id pinId) {
         hz = 5000;
     }    
 }
-*/
 
 void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
     uint_t pinValue = PIN_getOutputValue( Board_LED0 );
     pinValue =  !pinValue;
     PIN_setOutputValue( ledHandle, Board_LED0, pinValue );
-    programState = INTERPRETING;
+    programState = (programState == WAITING) ? INTERPRETING : WAITING;
     System_printf("Button pressed.");
     System_flush();
 }
@@ -192,25 +190,25 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
             mpu9250_get_data(i2cMPU, &x1,&y1,&z1,&x2,&y2,&z2);
             if (spaces >= 3){
                 programState = WAITING;
-            }
-            else if (x2 > 200.0){
-                message[i] = '.';
                 spaces = 0;
-                i++;
             }
-            else if (y2 > 200.0){
-                message[i] = '-';
+            else if (y1 < -1.2){
+                message[i++] = '.';
+                message[i++] = '\r';
+                message[i++] = '\n';
                 spaces = 0;
-                i++;
             }
-            else if(NULL){
-                message[i] = ' ';
+            else if (y2 > 200){
+                message[i++] = '-';
+                message[i++] = '\r';
+                message[i++] = '\n';
+                spaces = 0;
+            }
+            else if(x2 < -200){
+                message[i++] = ' ';
+                message[i++] = '\r';
+                message[i++] = '\n';
                 spaces++;
-                i++;
-            }
-            if (i % 10 == 0)
-            {
-                System_flush();
             }
             
             // 0.2s sleep
@@ -252,15 +250,14 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
     if(!ledHandle) {
         System_abort("Error initializing LED pins\n");
     }
-/*
+
     buzzerHandle = PIN_open(&buzzerState, buzzerConfig);
     if (!buzzerHandle)
     {
         System_abort("Error initializing Buzzer pins\n");
     }
-    // buzzerOpen(buzzerHandle);
-    // buzzerSetFrequency(5000);
-*/
+    buzzerOpen(buzzerHandle);
+    buzzerSetFrequency(5000);
     // Enable the pins for use in the program
     buttonHandle = PIN_open(&buttonState, buttonConfig);
     if(!buttonHandle) {
@@ -269,12 +266,11 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
     if (PIN_registerIntCb(buttonHandle, &buttonFxn) != 0) {
         System_abort("Error registering button callback function");
     }
-/*
+
     button2Handle = PIN_open(&button2State, button2Config);
     if (PIN_registerIntCb(button2Handle, &button2Fxn) != 0) {
         System_abort("Error registering button callback function");
     }
-*/
 
     Task_Params_init(&uartTaskParams);
     uartTaskParams.stackSize = STACKSIZE;
