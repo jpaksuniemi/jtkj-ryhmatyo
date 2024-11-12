@@ -74,7 +74,7 @@ B5 = 988
 };
 
 static enum noteLength{
-    whole = (1000000/ Clock_tickPeriod),
+    whole = (1000000),
     half = (whole / 2),
     quart = (whole / 4),
     eigth = (whole / 8),
@@ -361,7 +361,7 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
 void note(PIN_Handle buzzer, uint16_t freq, int time){
     buzzerOpen(buzzer);
     buzzerSetFrequency(freq);
-    Task_sleep(time);
+    Task_sleep(time/ Clock_tickPeriod);
     buzzerClose();
 
 }
