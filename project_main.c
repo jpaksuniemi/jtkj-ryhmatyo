@@ -34,6 +34,53 @@ static PIN_State MpuPinState;
 static PIN_State ledState;
 static PIN_State buzzerState;
 
+static enum noteFreq{
+C3 = 131,
+Cis3 = 139,
+D3 = 147,
+Dis3 = 156,
+E3 = 165,
+F3 = 175,
+Fis3 = 185,
+G3 = 196,
+Gis3 = 208,
+A3 = 220,
+Bes3 = 233,
+B3 = 247,
+C4 = 262,
+Cis4 = 277,
+D4 = 294,
+Dis4 = 311,
+E4 = 330,
+F4 = 349,
+Fis4 = 370,
+G4 = 392,
+Gis4 = 415,
+A4 = 440,
+Bes4 = 466,
+B4 = 494,
+C5 =  523,
+Cis5 = 554,
+D5 = 587,
+Dis5 = 622,
+E5 = 659,
+F5 = 698,
+Fis5 =740,
+G5 = 784,
+Gis5 = 831,
+A5 = 880,
+Bes5 = 932,
+B5 = 988
+};
+
+static enum noteLength{
+    whole = (1000000/ Clock_tickPeriod),
+    half = (whole / 2),
+    quart = (whole / 4),
+    eigth = (whole / 8),
+    sixteenth = (whole / 16)
+};
+
 // Pin configuration
 PIN_Config buttonConfig[] = {
    Board_BUTTON0  | PIN_INPUT_EN | PIN_PULLUP | PIN_IRQ_NEGEDGE,
@@ -147,16 +194,16 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
 }
 
 void printMessage(char* message){
-
-    for(int i = 0; message[i] != '\0'; i++){
+    int i;
+    for(i = 0; message[i] != '\0'; i++){
         if(message[i] == '.'){
-            note(buzzerHandle, noteFreq.A4, noteLength.half);
+            note(buzzerHandle, A4, half);
         }
         else if(message[i] == '-'){
-            note(buzzerHandle, noteFreq.A4, noteLength.whole);
+            note(buzzerHandle, A4, whole);
         }
         else if (message[i] == ' '){
-            note(buzzerHandle, 3, noteLength.half);
+            note(buzzerHandle, 3, half);
         }
     }
 }
@@ -212,21 +259,21 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
                 message[i++] = '\r';
                 message[i++] = '\n';
                 spaces = 0;
-                note(buzzerHandle, noteFreq.A4, noteLength.half);
+                note(buzzerHandle, A4, half);
             }
             else if (y2 > 200){
                 message[i++] = '-';
                 message[i++] = '\r';
                 message[i++] = '\n';
                 spaces = 0;
-                note(buzzerHandle, noteFreq.A4, noteLength.whole);
+                note(buzzerHandle, A4, whole);
             }
             else if(x2 < -200){
                 message[i++] = ' ';
                 message[i++] = '\r';
                 message[i++] = '\n';
                 spaces++;
-                note(buzzerHandle, 3, noteLength.whole);
+                note(buzzerHandle, 3, whole);
             }
             
             // 0.2s sleep
@@ -285,10 +332,10 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
         System_abort("Error registering button callback function");
     }
 
-    button2Handle = PIN_open(&button2State, button2Config);
-    if (PIN_registerIntCb(button2Handle, &button2Fxn) != 0) {
-        System_abort("Error registering button callback function");
-    }
+    //button2Handle = PIN_open(&button2State, button2Config);
+   // if (PIN_registerIntCb(button2Handle, &button2Fxn) != 0) {
+     //   System_abort("Error registering button callback function");
+    //}
 
     Task_Params_init(&uartTaskParams);
     uartTaskParams.stackSize = STACKSIZE;
@@ -309,52 +356,7 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
     return (0);
 }
 
-enum noteFreq{
-C3 = 131,
-Cis3 = 139,
-D3 = 147,
-Dis3 = 156,
-E3 = 165,
-F3 = 175,
-Fis3 = 185,
-G3 = 196,
-Gis3 = 208,
-A3 = 220,
-Bes3 = 233,
-B3 = 247,
-C4 = 262,
-Cis4 = 277,
-D4 = 294,
-Dis4 = 311,
-E4 = 330,
-F4 = 349,
-Fis4 = 370,
-G4 = 392,
-Gis4 = 415,
-A4 = 440,
-Bes4 = 466,
-B4 = 494,
-C5 =  523,
-Cis5 = 554,
-D5 = 587,
-Dis5 = 622,
-E5 = 659,
-F5 = 698,
-Fis5 =740,
-G5 = 784,
-Gis5 = 831,
-A5 = 880,
-Bes5 = 932,
-B5 = 988
-}
 
-enum noteLength{
-    whole = 1000000/ Clock_tickPeriod,
-    half = whole / 2,
-    quart = whole / 4,
-    eigth = whole / 8,
-    sixteenth = whole / 16
-}
 
 void note(PIN_Handle buzzer, uint16_t freq, int time){
     buzzerOpen(buzzer);
