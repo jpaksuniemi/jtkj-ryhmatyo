@@ -345,14 +345,14 @@ B5 = 988
 }
 
 enum noteLength{
-    whole = 1000000/ Clock_tickPeriod
-    half = whole / 2
-    quart = whole / 4
-    eigth = whole / 8
+    whole = 1000000/ Clock_tickPeriod,
+    half = whole / 2,
+    quart = whole / 4,
+    eigth = whole / 8,
     sixteenth = whole / 16
 }
 
-void note(buzzer, freq, time){
+void note(PIN_Handle buzzer, uint16_t freq, int time){
     buzzerOpen(buzzer);
     buzzerSetFrequency(freq);
     Task_sleep(time);
