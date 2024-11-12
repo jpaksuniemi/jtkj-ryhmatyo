@@ -150,12 +150,13 @@ void printMessage(char* message){
 
     for(int i = 0; message[i] != '\0'; i++){
         if(message[i] == '.'){
-           
+            note(buzzerHandle, noteFreq.A4, noteLength.half);
         }
         else if(message[i] == '-'){
-
-        }else {
-
+            note(buzzerHandle, noteFreq.A4, noteLength.whole);
+        }
+        else if (message[i] == ' '){
+            note(buzzerHandle, 3, noteLength.half);
         }
     }
 }
@@ -211,18 +212,21 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
                 message[i++] = '\r';
                 message[i++] = '\n';
                 spaces = 0;
+                note(buzzerHandle, noteFreq.A4, noteLength.half);
             }
             else if (y2 > 200){
                 message[i++] = '-';
                 message[i++] = '\r';
                 message[i++] = '\n';
                 spaces = 0;
+                note(buzzerHandle, noteFreq.A4, noteLength.whole);
             }
             else if(x2 < -200){
                 message[i++] = ' ';
                 message[i++] = '\r';
                 message[i++] = '\n';
                 spaces++;
+                note(buzzerHandle, 3, noteLength.whole);
             }
             
             // 0.2s sleep
