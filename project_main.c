@@ -16,6 +16,7 @@
 #include <ti/drivers/Power.h>
 #include <ti/drivers/power/PowerCC26XX.h>
 #include <ti/drivers/UART.h>
+#include "summeridemo/buzzer.h"
 
 /* Board Header files */
 #include "Board.h"
@@ -24,15 +25,29 @@
 // MPU power pin global variables
 static PIN_Handle hMpuPin;
 static PIN_Handle buttonHandle;
+static PIN_Handle button2Handle;
 static PIN_Handle ledHandle;
+static PIN_Handle buzzerHandle;
 static PIN_State buttonState;
+static PIN_State button2State;
 static PIN_State MpuPinState;
 static PIN_State ledState;
+static PIN_State buzzerState;
 
 // Pin configuration
 PIN_Config buttonConfig[] = {
-   Board_BUTTON0  | PIN_INPUT_EN | PIN_PULLUP | PIN_IRQ_POSEDGE,
+   Board_BUTTON0  | PIN_INPUT_EN | PIN_PULLUP | PIN_IRQ_NEGEDGE,
    PIN_TERMINATE 
+};
+
+PIN_Config button2Config[] = {
+   Board_BUTTON1  | PIN_INPUT_EN | PIN_PULLUP | PIN_IRQ_NEGEDGE,
+   PIN_TERMINATE 
+};
+
+PIN_Config buzzerConfig[] = {
+    Board_BUZZER | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW,
+    PIN_TERMINATE
 };
 
 // MPU power pin
@@ -66,13 +81,28 @@ enum state programState = WAITING;
 
 float x1, y1, z1, x2, y2, z2;
 
-char message[128];
+int hz = 5000;
+
+char message[1028];
+
+void button2Fxn(PIN_Handle handle, PIN_Id pinId) {
+    if (5000 == hz)
+    {
+        buzzerSetFrequency(3);
+        hz = 3;    
+    }
+    else
+    {
+        buzzerSetFrequency(5000);
+        hz = 5000;
+    }    
+}
 
 void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
     uint_t pinValue = PIN_getOutputValue( Board_LED0 );
     pinValue =  !pinValue;
     PIN_setOutputValue( ledHandle, Board_LED0, pinValue );
-    programState = INTERPRETING;
+    programState = (programState == WAITING) ? INTERPRETING : WAITING;
     System_printf("Button pressed.");
     System_flush();
 }
@@ -107,12 +137,26 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
         System_printf("uartTask\n");
         System_flush();
 
-        sprintf(msg, "ax:%5.2f,ay:%5.2f,az:%5.2f,gx:%5.2f,gy:%5.2f,gz:%5.2f\n\r", x1, y1, z1, x2, y2, z2);
+        sprintf(msg, "\nax:%5.2f,ay:%5.2f,az:%5.2f,gx:%5.2f,gy:%5.2f,gz:%5.2f\n\r", x1, y1, z1, x2, y2, z2);
         UART_write(uart, msg, strlen(msg));
         UART_write(uart, message, strlen(message));
 
         // Once per second, you can modify this
         Task_sleep(200000 / Clock_tickPeriod);
+    }
+}
+
+void printMessage(char* message){
+
+    for(int i = 0; message[i] != '\0'; i++){
+        if(message[i] == '.'){
+           
+        }
+        else if(message[i] == '-'){
+
+        }else {
+
+        }
     }
 }
 
@@ -150,52 +194,43 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
 	System_flush();
 
     
-
+    int i = 0;
+    int spaces = 0;
     while (1) {
         if (programState == INTERPRETING)
         {
-            // Just for sanity check for exercise, you can comment this out
             System_printf("sensorTask\n");
             System_flush();
-            interpret(&i2cMPU);
+            mpu9250_get_data(i2cMPU, &x1,&y1,&z1,&x2,&y2,&z2);
+            if (spaces >= 3){
+                programState = WAITING;
+                spaces = 0;
+            }
+            else if (y1 < -1.2){
+                message[i++] = '.';
+                message[i++] = '\r';
+                message[i++] = '\n';
+                spaces = 0;
+            }
+            else if (y2 > 200){
+                message[i++] = '-';
+                message[i++] = '\r';
+                message[i++] = '\n';
+                spaces = 0;
+            }
+            else if(x2 < -200){
+                message[i++] = ' ';
+                message[i++] = '\r';
+                message[i++] = '\n';
+                spaces++;
+            }
+            
+            // 0.2s sleep
+            Task_sleep(200000 / Clock_tickPeriod);
+            }
         }
     }
-}
 
-void interpret(I2C_Handle *i2cMPU) {
-    
-    while (programState == INTERPRETING){
-    mpu9250_get_data(i2cMPU, &x1,&y1,&z1,&x2,&y2,&z2);
-    int spaces = 0;
-    int i = 0;
-    if (spaces >= 3){
-        programState = INTERPRETING;
-    }
-    else if (x2 > 200.0){
-        message[i] = '.';
-        spaces = 0;
-        i++;
-    }
-    else if (y2 > 200.0){
-        message[i] = '-';
-        spaces = 0;
-        i++;
-    }
-    else if(NULL){
-        message[i] = ' ';
-        spaces++;
-        i++;
-    }
-    if (i % 10 == 0)
-    {
-        System_printf(sendableMessage);
-        System_flush();
-    }
-    
-    // 0.2s sleep
-    Task_sleep(200000 / Clock_tickPeriod);
-    }
-}
 
     Int main(void) {
 
@@ -230,12 +265,24 @@ void interpret(I2C_Handle *i2cMPU) {
         System_abort("Error initializing LED pins\n");
     }
 
+    buzzerHandle = PIN_open(&buzzerState, buzzerConfig);
+    if (!buzzerHandle)
+    {
+        System_abort("Error initializing Buzzer pins\n");
+    }
+    buzzerOpen(buzzerHandle);
+    buzzerSetFrequency(5000);
     // Enable the pins for use in the program
     buttonHandle = PIN_open(&buttonState, buttonConfig);
     if(!buttonHandle) {
         System_abort("Error initializing button pins\n");
     }
     if (PIN_registerIntCb(buttonHandle, &buttonFxn) != 0) {
+        System_abort("Error registering button callback function");
+    }
+
+    button2Handle = PIN_open(&button2State, button2Config);
+    if (PIN_registerIntCb(button2Handle, &button2Fxn) != 0) {
         System_abort("Error registering button callback function");
     }
 
