@@ -197,14 +197,15 @@ void printMessage(char* message){
     int i;
     for(i = 0; message[i] != '\0'; i++){
         if(message[i] == '.'){
-            note(buzzerHandle, A4, half);
+            note(buzzerHandle, A4, quart);
         }
         else if(message[i] == '-'){
-            note(buzzerHandle, A4, whole);
+            note(buzzerHandle, A4, half);
         }
         else if (message[i] == ' '){
-            note(buzzerHandle, 3, half);
+            note(buzzerHandle, 3, quart);
         }
+        note(buzzerHandle, 3, quart);
     }
 }
 
@@ -253,6 +254,7 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
             if (spaces >= 3){
                 programState = WAITING;
                 spaces = 0;
+                printMessage(message);
             }
             else if (y1 < -1.2){
                 message[i++] = '.';
@@ -321,8 +323,6 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
     {
         System_abort("Error initializing Buzzer pins\n");
     }
-    buzzerOpen(buzzerHandle);
-    buzzerSetFrequency(5000);
     // Enable the pins for use in the program
     buttonHandle = PIN_open(&buttonState, buttonConfig);
     if(!buttonHandle) {
