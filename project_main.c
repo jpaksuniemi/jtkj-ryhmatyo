@@ -150,9 +150,9 @@ void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
     pinValue =  !pinValue;
     PIN_setOutputValue( ledHandle, Board_LED0, pinValue );
     programState = (programState == WAITING) ? INTERPRETING : WAITING;
-    note(buzzerHandle, C4, eigth)
-    note(buzzerHandle, Dis4, eigth)
-    note(buzzerHandle, G4, eigth)
+    note(buzzerHandle, C4, eigth);
+    note(buzzerHandle, Dis4, eigth);
+    note(buzzerHandle, G4, eigth);
     System_printf("Button pressed.");
     System_flush();
 }
@@ -185,6 +185,9 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
     while (1) {
         if (programState == MESSAGE_READY){
             UART_write(uart, message, strlen(message));
+            note(buzzerHandle, G4, eigth);
+            note(buzzerHandle, Dis4, eigth);
+            note(buzzerHandle, C4, eigth);
             programState = WAITING;
         }
     }
