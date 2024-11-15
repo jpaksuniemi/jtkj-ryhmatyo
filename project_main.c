@@ -1,5 +1,6 @@
 /* C Standard library */
 #include <stdio.h>
+#include <string.h>
 
 /* XDCtools files */
 #include <xdc/std.h>
@@ -33,6 +34,8 @@ static PIN_State button2State;
 static PIN_State MpuPinState;
 static PIN_State ledState;
 static PIN_State buzzerState;
+
+void note(PIN_Handle buzzer, uint16_t freq, int time);
 
 static enum noteFreq{
 C3 = 131,
@@ -170,8 +173,6 @@ void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
 /* Task Functions */
 Void uartTaskFxn(UArg arg0, UArg arg1) {
 
-    char msg[80];
-
     UART_Handle uart;
     UART_Params uartParams;
 
@@ -194,12 +195,18 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
 
     while (1) {
         if (programState == MESSAGE_READY){
+            System_printf("Sending message\n");
+            System_flush();
             UART_write(uart, message, strlen(message));
             note(buzzerHandle, G4, eigth);
             note(buzzerHandle, Dis4, eigth);
             note(buzzerHandle, C4, eigth);
             programState = WAITING;
+        } else if (programState == WAITING) {
+            System_printf("uartTask\n");
+            System_flush();
         }
+        Task_sleep(1000000 / Clock_tickPeriod);
     }
 }
 
@@ -260,6 +267,9 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
         {
             mpu9250_get_data(i2cMPU, &x1,&y1,&z1,&x2,&y2,&z2);
             if (spaces >= 3){
+                System_printf("3 spaces\n");
+                System_flush();
+                message[i] = '\0';
                 programState = MESSAGE_READY;
                 spaces = 0;
                 printMessage(message);
@@ -289,8 +299,8 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
             // 0.2s sleep
             Task_sleep(200000 / Clock_tickPeriod);
             }
+        Task_sleep(1000000 / Clock_tickPeriod );
         }
-      
     }
 
 
