@@ -80,6 +80,8 @@ static enum noteLength{
     eigth = (whole / 8),
     sixteenth = (whole / 16)
 };
+static int UKKONOOA_LENGTH = 13;
+static enum noteFreq ukkonooaNotes[] = { C4, C4, C4, E4, D4, D4, D4, F4, E4, E4, D4, D4, C4};
 
 // Pin configuration
 PIN_Config buttonConfig[] = {
@@ -131,6 +133,14 @@ float x1, y1, z1, x2, y2, z2;
 int hz = 5000;
 
 char message[1028];
+
+void playUkkoNooa() {
+    int i;
+    for (i = 0; i < UKKONOOA_LENGTH; i++)
+    {
+        note(buzzerHandle, ukkonooaNotes[i], half);
+    }
+}
 
 void button2Fxn(PIN_Handle handle, PIN_Id pinId) {
     if (5000 == hz)
