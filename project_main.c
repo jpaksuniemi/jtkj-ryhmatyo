@@ -122,7 +122,7 @@ Char sensorTaskStack[STACKSIZE];
 Char uartTaskStack[STACKSIZE];
 
 enum state { WAITING=1,
-    INTERPRETING
+    INTERPRETING, MESSAGE_READY
 };
 enum state programState = WAITING;
 
@@ -180,16 +180,10 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
     }
 
     while (1) {
-        // Just for sanity check for exercise, you can comment this out
-        System_printf("uartTask\n");
-        System_flush();
-
-        sprintf(msg, "\nax:%5.2f,ay:%5.2f,az:%5.2f,gx:%5.2f,gy:%5.2f,gz:%5.2f\n\r", x1, y1, z1, x2, y2, z2);
-        UART_write(uart, msg, strlen(msg));
-        UART_write(uart, message, strlen(message));
-
-        // Once per second, you can modify this
-        Task_sleep(200000 / Clock_tickPeriod);
+        if (programState == MESSAGE_READY){
+            UART_write(uart, message, strlen(message));
+            programState = WAITING;
+        }
     }
 }
 
@@ -247,11 +241,9 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
     while (1) {
         if (programState == INTERPRETING)
         {
-            System_printf("sensorTask\n");
-            System_flush();
             mpu9250_get_data(i2cMPU, &x1,&y1,&z1,&x2,&y2,&z2);
             if (spaces >= 3){
-                programState = WAITING;
+                programState = MESSAGE_READY;
                 spaces = 0;
             }
             else if (y1 < -1.2){
@@ -280,6 +272,7 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
             Task_sleep(200000 / Clock_tickPeriod);
             }
         }
+      
     }
 
 
