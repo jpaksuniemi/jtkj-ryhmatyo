@@ -150,6 +150,9 @@ void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
     pinValue =  !pinValue;
     PIN_setOutputValue( ledHandle, Board_LED0, pinValue );
     programState = (programState == WAITING) ? INTERPRETING : WAITING;
+    note(buzzerHandle, C4, eigth)
+    note(buzzerHandle, Dis4, eigth)
+    note(buzzerHandle, G4, eigth)
     System_printf("Button pressed.");
     System_flush();
 }
@@ -203,7 +206,7 @@ void printMessage(char* message){
             note(buzzerHandle, A4, half);
         }
         else if (message[i] == ' '){
-            note(buzzerHandle, 3, quart);
+            note(buzzerHandle, A3, quart+eigth);
         }
         note(buzzerHandle, 3, quart);
     }
@@ -275,7 +278,7 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
                 message[i++] = '\r';
                 message[i++] = '\n';
                 spaces++;
-                note(buzzerHandle, 3, whole);
+                note(buzzerHandle, A3, half + quart);
             }
             
             // 0.2s sleep
