@@ -150,6 +150,9 @@ void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
     pinValue =  !pinValue;
     PIN_setOutputValue( ledHandle, Board_LED0, pinValue );
     programState = (programState == WAITING) ? INTERPRETING : WAITING;
+    note(buzzerHandle, C4, eigth)
+    note(buzzerHandle, Dis4, eigth)
+    note(buzzerHandle, G4, eigth)
     System_printf("Button pressed.");
     System_flush();
 }
@@ -191,14 +194,15 @@ void printMessage(char* message){
     int i;
     for(i = 0; message[i] != '\0'; i++){
         if(message[i] == '.'){
-            note(buzzerHandle, A4, half);
+            note(buzzerHandle, A4, quart);
         }
         else if(message[i] == '-'){
-            note(buzzerHandle, A4, whole);
+            note(buzzerHandle, A4, half);
         }
         else if (message[i] == ' '){
-            note(buzzerHandle, 3, half);
+            note(buzzerHandle, A3, quart+eigth);
         }
+        note(buzzerHandle, 3, quart);
     }
 }
 
@@ -245,6 +249,7 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
             if (spaces >= 3){
                 programState = MESSAGE_READY;
                 spaces = 0;
+                printMessage(message);
             }
             else if (y1 < -1.2){
                 message[i++] = '.';
@@ -265,7 +270,7 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
                 message[i++] = '\r';
                 message[i++] = '\n';
                 spaces++;
-                note(buzzerHandle, 3, whole);
+                note(buzzerHandle, A3, half + quart);
             }
             
             // 0.2s sleep
@@ -314,8 +319,6 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
     {
         System_abort("Error initializing Buzzer pins\n");
     }
-    buzzerOpen(buzzerHandle);
-    buzzerSetFrequency(5000);
     // Enable the pins for use in the program
     buttonHandle = PIN_open(&buttonState, buttonConfig);
     if(!buttonHandle) {
