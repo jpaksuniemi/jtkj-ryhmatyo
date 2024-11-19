@@ -125,6 +125,7 @@ static const I2CCC26XX_I2CPinCfg i2cMPUCfg = {
 #define STACKSIZE 2048
 Char sensorTaskStack[STACKSIZE];
 Char uartTaskStack[STACKSIZE];
+uint8_t uartBuffer[30];
 
 enum state { WAITING=1,
     INTERPRETING
@@ -136,6 +137,22 @@ float x1, y1, z1, x2, y2, z2;
 int hz = 5000;
 
 char message[4];
+
+void printMessage(uint8_t* message){
+    int i;
+    for(i = 0; message[i] != '\0'; i++){
+        if(message[i] == '.'){
+            note(buzzerHandle, A4, quart);
+        }
+        else if(message[i] == '-'){
+            note(buzzerHandle, A4, half);
+        }
+        else if (message[i] == ' '){
+            note(buzzerHandle, A3, quart+eigth);
+        }
+        note(buzzerHandle, 3, quart);
+    }
+}
 
 void playUkkoNooa() {
     int i;
@@ -170,12 +187,14 @@ void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
     System_flush();
 }
 
+static void uartFxn(UART_Handle handle, void *rxBuf, size_t len){
+    int time = (uartBuffer[0]=='.') ? 10000 : 20000;
+    note(buzzerHandle, A5, time);
+    UART_read(handle, rxBuf, 1);
+}
+
 /* Task Functions */
 Void uartTaskFxn(UArg arg0, UArg arg1) {
-
-    char input[30];
-    char echo_msg[30];
-    uint8_t uartBuffer[30];
 
     UART_Handle uart;
     UART_Params uartParams;
@@ -186,6 +205,7 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
     uartParams.readDataMode = UART_DATA_TEXT;
     uartParams.readEcho = UART_ECHO_OFF;
     uartParams.readMode = UART_MODE_CALLBACK;
+    uartParams.readCallback = &uartFxn;
     uartParams.baudRate = 9600;
     uartParams.dataLength = UART_LEN_8;
     uartParams.parityType = UART_PAR_NONE;
@@ -212,27 +232,6 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
             // UART_write(uart, echo_msg, strlen(echo_msg));
         }
         Task_sleep(1000000 / Clock_tickPeriod);
-    }
-}
-
-static void uartFxn(UART_Handle handle, void *rxBuf, size_t len){
-    printMessage(rxBuf);
-    UART_read(handle, rxBuf, 1);
-}
-
-void printMessage(char* message){
-    int i;
-    for(i = 0; message[i] != '\0'; i++){
-        if(message[i] == '.'){
-            note(buzzerHandle, A4, quart);
-        }
-        else if(message[i] == '-'){
-            note(buzzerHandle, A4, half);
-        }
-        else if (message[i] == ' '){
-            note(buzzerHandle, A3, quart+eigth);
-        }
-        note(buzzerHandle, 3, quart);
     }
 }
 
