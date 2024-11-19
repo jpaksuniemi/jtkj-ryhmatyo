@@ -173,6 +173,9 @@ void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
 /* Task Functions */
 Void uartTaskFxn(UArg arg0, UArg arg1) {
 
+    char input;
+    char echo_msg[30];
+
     UART_Handle uart;
     UART_Params uartParams;
 
@@ -203,8 +206,9 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
             note(buzzerHandle, C4, eigth);
             programState = WAITING;
         } else if (programState == WAITING) {
-            System_printf("uartTask\n");
-            System_flush();
+            UART_read(uart, &input, 1);
+            sprinf(echo_msg, "Vastaanotettu %c\n", input);
+            UART_write(uart, echo_msg, strlen(echo_msg));
         }
         Task_sleep(1000000 / Clock_tickPeriod);
     }
