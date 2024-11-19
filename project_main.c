@@ -173,7 +173,7 @@ void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
 /* Task Functions */
 Void uartTaskFxn(UArg arg0, UArg arg1) {
 
-    char input;
+    char input[30];
     char echo_msg[30];
 
     UART_Handle uart;
@@ -203,11 +203,17 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
             UART_write(uart, message, 4);
             /*note(buzzerHandle, G4, eigth);
             note(buzzerHandle, Dis4, eigth);
+<<<<<<< HEAD
             note(buzzerHandle, C4, eigth);*/
+=======
+            note(buzzerHandle, C4, eigth);
+            programState = WAITING;
+            memset(message, '\0', sizeof(message));
+>>>>>>> c0439ceaba303624d6351a90eba9ba33004294bc
         } else if (programState == WAITING) {
-            UART_read(uart, &input, 1);
-            sprinf(echo_msg, "Vastaanotettu %c\n", input);
-            UART_write(uart, echo_msg, strlen(echo_msg));
+            // UART_read(uart, &input, 30);
+            // sprintf(echo_msg, "Vastaanotettu %c\n", input);
+            // UART_write(uart, echo_msg, strlen(echo_msg));
         }
         Task_sleep(1000000 / Clock_tickPeriod);
     }
@@ -269,11 +275,21 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
         if (programState == INTERPRETING)
         {
             mpu9250_get_data(i2cMPU, &x1,&y1,&z1,&x2,&y2,&z2);
+<<<<<<< HEAD
             if (spaces >= 3){
                 message[i] = '\0';
                 spaces = 0;
+=======
+            if (spaces >= 2){
+                System_printf("3 spaces\n");
+                System_flush();
+                message[i] = '\0';
+                programState = MESSAGE_READY;
+                spaces = i = 0;
+                printMessage(message);
+>>>>>>> c0439ceaba303624d6351a90eba9ba33004294bc
             }
-            else if (y1 < -1.2){
+            else if (y1 < -1.1){
                 message[i++] = '.';
                 message[i++] = '\r';
                 message[i++] = '\n';
@@ -296,10 +312,9 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
                 note(buzzerHandle, A3, half + quart);
             }
             
-            // 0.2s sleep
-            Task_sleep(200000 / Clock_tickPeriod);
-            }
-        Task_sleep(1000000 / Clock_tickPeriod );
+        }
+        // 0.2s sleep
+        Task_sleep(200000 / Clock_tickPeriod);
         }
     }
 
