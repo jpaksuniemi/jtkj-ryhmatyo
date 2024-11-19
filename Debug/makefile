@@ -131,34 +131,34 @@ endif
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXE_OUTPUTS += \
-empty_CC2650STK_TI.out \
+jtkj.out \
 
 EXE_OUTPUTS__QUOTED += \
-"empty_CC2650STK_TI.out" \
+"jtkj.out" \
 
 BIN_OUTPUTS += \
-empty_CC2650STK_TI.hex \
+jtkj.hex \
 
 BIN_OUTPUTS__QUOTED += \
-"empty_CC2650STK_TI.hex" \
+"jtkj.hex" \
 
 
 # All Target
 all: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
-	@$(MAKE) --no-print-directory -Onone "empty_CC2650STK_TI.out"
+	@$(MAKE) --no-print-directory -Onone "jtkj.out"
 
 # Tool invocations
-empty_CC2650STK_TI.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
+jtkj.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 	@echo 'Building target: "$@"'
 	@echo 'Invoking: Arm Linker'
-	"/home/linuxlite/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/bin/armcl" -mv7M3 --code_state=16 --float_support=none -me --define=ccs -g --diag_warning=225 --diag_warning=255 --diag_wrap=off --display_error_number --gen_func_subsections=on --abi=eabi -z -m"empty_CC2650STK_TI.map" --heap_size=0 --stack_size=256 -i"/home/linuxlite/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/lib" -i"/home/linuxlite/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="empty_CC2650STK_TI_linkInfo.xml" --rom_model -o "empty_CC2650STK_TI.out" $(ORDERED_OBJS)
+	"/home/linuxlite/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/bin/armcl" -mv7M3 --code_state=16 --float_support=none -me --define=ccs -g --diag_warning=225 --diag_warning=255 --diag_wrap=off --display_error_number --gen_func_subsections=on --abi=eabi -z -m"jtkj.map" --heap_size=0 --stack_size=256 -i"/home/linuxlite/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/lib" -i"/home/linuxlite/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="jtkj_linkInfo.xml" --rom_model -o "jtkj.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 
-empty_CC2650STK_TI.hex: $(EXE_OUTPUTS)
+jtkj.hex: $(EXE_OUTPUTS)
 	@echo 'Building secondary target: "$@"'
 	@echo 'Invoking: Arm Hex Utility'
-	"/home/linuxlite/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/bin/armhex" --memwidth=8 --romwidth=8 --diag_wrap=off --intel -o "empty_CC2650STK_TI.hex" $(EXE_OUTPUTS__QUOTED)
+	"/home/linuxlite/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/bin/armhex" --memwidth=8 --romwidth=8 --diag_wrap=off --intel -o "jtkj.hex" $(EXE_OUTPUTS__QUOTED)
 	@echo 'Finished building secondary target: "$@"'
 	@echo ' '
 
