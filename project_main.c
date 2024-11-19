@@ -127,7 +127,7 @@ Char sensorTaskStack[STACKSIZE];
 Char uartTaskStack[STACKSIZE];
 
 enum state { WAITING=1,
-    INTERPRETING, MESSAGE_READY
+    INTERPRETING
 };
 enum state programState = WAITING;
 
@@ -135,7 +135,7 @@ float x1, y1, z1, x2, y2, z2;
 
 int hz = 5000;
 
-char message[1028];
+char message[4];
 
 void playUkkoNooa() {
     int i;
@@ -197,14 +197,13 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
     }
 
     while (1) {
-        if (programState == MESSAGE_READY){
+        if (programState == INTERPRETING){
             System_printf("Sending message\n");
             System_flush();
-            UART_write(uart, message, strlen(message));
-            note(buzzerHandle, G4, eigth);
+            UART_write(uart, message, 4);
+            /*note(buzzerHandle, G4, eigth);
             note(buzzerHandle, Dis4, eigth);
-            note(buzzerHandle, C4, eigth);
-            programState = WAITING;
+            note(buzzerHandle, C4, eigth);*/
         } else if (programState == WAITING) {
             UART_read(uart, &input, 1);
             sprinf(echo_msg, "Vastaanotettu %c\n", input);
@@ -271,12 +270,8 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
         {
             mpu9250_get_data(i2cMPU, &x1,&y1,&z1,&x2,&y2,&z2);
             if (spaces >= 3){
-                System_printf("3 spaces\n");
-                System_flush();
                 message[i] = '\0';
-                programState = MESSAGE_READY;
                 spaces = 0;
-                printMessage(message);
             }
             else if (y1 < -1.2){
                 message[i++] = '.';
@@ -297,6 +292,7 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
                 message[i++] = '\r';
                 message[i++] = '\n';
                 spaces++;
+
                 note(buzzerHandle, A3, half + quart);
             }
             
