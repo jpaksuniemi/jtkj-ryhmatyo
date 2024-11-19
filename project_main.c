@@ -204,7 +204,7 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
             /*note(buzzerHandle, G4, eigth);
             note(buzzerHandle, Dis4, eigth);
             note(buzzerHandle, C4, eigth);*/
-            memset(message, '\0', sizeof(message));
+            memset(message, '\0', 4);
         } else if (programState == WAITING) {
             // UART_read(uart, &input, 30);
             // sprintf(echo_msg, "Vastaanotettu %c\n", input);
@@ -270,33 +270,25 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
         if (programState == INTERPRETING)
         {
             mpu9250_get_data(i2cMPU, &x1,&y1,&z1,&x2,&y2,&z2);
-            if (spaces >= 2){
-                message[i] = '\0';
-                programState = MESSAGE_READY;
-                spaces = i = 0;
-            }
-            else if (y1 < -1.1){
+            if (y1 < -1.1){
                 message[i++] = '.';
                 message[i++] = '\r';
                 message[i++] = '\n';
-                spaces = 0;
-                note(buzzerHandle, A4, half);
+                // note(buzzerHandle, A4, half);
             }
             else if (y2 > 200){
                 message[i++] = '-';
                 message[i++] = '\r';
                 message[i++] = '\n';
-                spaces = 0;
-                note(buzzerHandle, A4, whole);
+                // note(buzzerHandle, A4, whole);
             }
             else if(x2 < -200){
                 message[i++] = ' ';
                 message[i++] = '\r';
                 message[i++] = '\n';
-                spaces++;
-
-                note(buzzerHandle, A3, half + quart);
+                // note(buzzerHandle, A3, half + quart);
             }
+            i = 0;
             
         }
         // 0.2s sleep
