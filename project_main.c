@@ -175,6 +175,7 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
 
     char input[30];
     char echo_msg[30];
+    uint8_t uartBuffer[30];
 
     UART_Handle uart;
     UART_Params uartParams;
@@ -184,7 +185,7 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
     uartParams.writeDataMode = UART_DATA_TEXT;
     uartParams.readDataMode = UART_DATA_TEXT;
     uartParams.readEcho = UART_ECHO_OFF;
-    uartParams.readMode = UART_MODE_BLOCKING;
+    uartParams.readMode = UART_MODE_CALLBACK;
     uartParams.baudRate = 9600;
     uartParams.dataLength = UART_LEN_8;
     uartParams.parityType = UART_PAR_NONE;
@@ -195,7 +196,7 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
     {
         System_abort("Error opening the UART");
     }
-
+    UART_read(uart, uartBuffer, 1);
     while (1) {
         if (programState == INTERPRETING){
             System_printf("Sending message\n");
@@ -212,6 +213,11 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
         }
         Task_sleep(1000000 / Clock_tickPeriod);
     }
+}
+
+static void uartFxn(UART_Handle handle, void *rxBuf, size_t len){
+    printMessage(rxBuf);
+    UART_read(handle, rxBuf, 1);
 }
 
 void printMessage(char* message){
