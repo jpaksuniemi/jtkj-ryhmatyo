@@ -219,13 +219,15 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
     UART_read(uart, uartBuffer, 1);
     while (1) {
         if (programState == INTERPRETING){
-            System_printf("Sending message\n");
-            System_flush();
-            UART_write(uart, message, 4);
-            /*note(buzzerHandle, G4, eigth);
-            note(buzzerHandle, Dis4, eigth);
-            note(buzzerHandle, C4, eigth);*/
-            memset(message, '\0', 4);
+            if(message[0] != '\0'){
+                System_printf("Sending message\n");
+                System_flush();
+                UART_write(uart, message, 4);
+                /*note(buzzerHandle, G4, eigth);
+                note(buzzerHandle, Dis4, eigth);
+                note(buzzerHandle, C4, eigth);*/
+                memset(message, '\0', 4);
+            }
         } else if (programState == WAITING) {
             // UART_read(uart, &input, 30);
             // sprintf(echo_msg, "Vastaanotettu %c\n", input);
