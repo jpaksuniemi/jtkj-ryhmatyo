@@ -125,7 +125,7 @@ static const I2CCC26XX_I2CPinCfg i2cMPUCfg = {
 #define STACKSIZE 2048
 Char sensorTaskStack[STACKSIZE];
 Char uartTaskStack[STACKSIZE];
-uint8_t uartBuffer[30];
+uint8_t uartBuffer[1];
 
 enum state { WAITING=1,
     INTERPRETING
@@ -138,6 +138,7 @@ int hz = 5000;
 
 char message[4];
 
+// not in use yet
 void printMessage(uint8_t* message){
     int i;
     for(i = 0; message[i] != '\0'; i++){
@@ -154,25 +155,13 @@ void printMessage(uint8_t* message){
     }
 }
 
+// not in use yet
 void playUkkoNooa() {
     int i;
     for (i = 0; i < UKKONOOA_LENGTH; i++)
     {
         note(buzzerHandle, ukkonooaNotes[i], half);
     }
-}
-
-void button2Fxn(PIN_Handle handle, PIN_Id pinId) {
-    if (5000 == hz)
-    {
-        buzzerSetFrequency(3);
-        hz = 3;    
-    }
-    else
-    {
-        buzzerSetFrequency(5000);
-        hz = 5000;
-    }    
 }
 
 void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
@@ -187,14 +176,19 @@ void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
     System_flush();
 }
 
-static void uartFxn(UART_Handle handle, void *rxBuf, size_t len){
-    int time = (uartBuffer[0]=='.') ? 10000 : 20000;
-    note(buzzerHandle, A5, time);
+void uWrite(UART_Handle handle, void *rxBuf, size_t len){
+    UART_write(handle, rxBuf, 1);
+
+}
+
+void uartFxn(UART_Handle handle, void *rxBuf, size_t len){
+    //UART_write(handle, rxBuf, 1);
+    uWrite(handle, rxBuf, len);
     UART_read(handle, rxBuf, 1);
 }
 
 /* Task Functions */
-Void uartTaskFxn(UArg arg0, UArg arg1) {
+void uartTaskFxn(UArg arg0, UArg arg1) {
 
     UART_Handle uart;
     UART_Params uartParams;
@@ -220,18 +214,12 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
     while (1) {
         if (programState == INTERPRETING){
             if(message[0] != '\0'){
-                System_printf("Sending message\n");
-                System_flush();
                 UART_write(uart, message, 4);
-                /*note(buzzerHandle, G4, eigth);
-                note(buzzerHandle, Dis4, eigth);
-                note(buzzerHandle, C4, eigth);*/
                 memset(message, '\0', 4);
             }
         } else if (programState == WAITING) {
-            // UART_read(uart, &input, 30);
-            // sprintf(echo_msg, "Vastaanotettu %c\n", input);
-            // UART_write(uart, echo_msg, strlen(echo_msg));
+           // UART_write(uart, uartBuffer, 4);
+           // test that didn't work
         }
         Task_sleep(1000000 / Clock_tickPeriod);
     }
@@ -281,19 +269,19 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
                 message[i++] = '.';
                 message[i++] = '\r';
                 message[i++] = '\n';
-                // note(buzzerHandle, A4, half);
+                note(buzzerHandle, A4, half);
             }
             else if (y2 > 200){
                 message[i++] = '-';
                 message[i++] = '\r';
                 message[i++] = '\n';
-                // note(buzzerHandle, A4, whole);
+                note(buzzerHandle, A4, whole);
             }
             else if(x2 < -200){
                 message[i++] = ' ';
                 message[i++] = '\r';
                 message[i++] = '\n';
-                // note(buzzerHandle, A3, half + quart);
+                note(buzzerHandle, A3, half + quart);
             }
             i = 0;
             
@@ -350,11 +338,6 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
     if (PIN_registerIntCb(buttonHandle, &buttonFxn) != 0) {
         System_abort("Error registering button callback function");
     }
-
-    //button2Handle = PIN_open(&button2State, button2Config);
-   // if (PIN_registerIntCb(button2Handle, &button2Fxn) != 0) {
-     //   System_abort("Error registering button callback function");
-    //}
 
     Task_Params_init(&uartTaskParams);
     uartTaskParams.stackSize = STACKSIZE;
