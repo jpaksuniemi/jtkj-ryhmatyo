@@ -26,11 +26,11 @@
 // MPU power pin global variables
 static PIN_Handle hMpuPin;
 static PIN_Handle buttonHandle;
-static PIN_Handle button2Handle;
+static PIN_Handle buttonHandle2;
 static PIN_Handle ledHandle;
 static PIN_Handle buzzerHandle;
 static PIN_State buttonState;
-static PIN_State button2State;
+static PIN_State buttonState2;
 static PIN_State MpuPinState;
 static PIN_State ledState;
 static PIN_State buzzerState;
@@ -92,7 +92,7 @@ PIN_Config buttonConfig[] = {
    PIN_TERMINATE 
 };
 
-PIN_Config button2Config[] = {
+PIN_Config buttonConfig2[] = {
    Board_BUTTON1  | PIN_INPUT_EN | PIN_PULLUP | PIN_IRQ_NEGEDGE,
    PIN_TERMINATE 
 };
@@ -125,6 +125,7 @@ static const I2CCC26XX_I2CPinCfg i2cMPUCfg = {
 #define STACKSIZE 2048
 Char sensorTaskStack[STACKSIZE];
 Char uartTaskStack[STACKSIZE];
+Char jukeboxStack[STACKSIZE];
 uint8_t uartBuffer[1];
 
 enum state { WAITING=1,
@@ -135,6 +136,8 @@ enum state programState = WAITING;
 float x1, y1, z1, x2, y2, z2;
 
 int hz = 5000;
+
+uint8_t playMusic = 0;
 
 char message[4];
 char message2[4];
@@ -177,6 +180,10 @@ void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
     System_flush();
 }
 
+void buttonFxn2(PIN_Handle handle, PIN_Id pinId) {
+    playMusic = (playMusic) ? 0 : 1;
+}
+
 void uartFxn(UART_Handle handle, void *rxBuf, size_t len){
     if((strcmp(rxBuf," ") == 0) || (strcmp(rxBuf,"-") == 0) || (strcmp(rxBuf,".") == 0)){
         sprintf(message2, "%c\r\n", uartBuffer[0]);
@@ -184,6 +191,18 @@ void uartFxn(UART_Handle handle, void *rxBuf, size_t len){
     }
     UART_read(handle, rxBuf, 1);
     return;
+}
+
+void jukeboxFxn(UArg arg0, UArg arg1) {
+    while (1)
+    {
+        if (playMusic)
+        {
+            playUkkoNooa();
+        }
+        Task_sleep(10000 / Clock_tickPeriod); 
+    }
+    
 }
 
 /* Task Functions */
@@ -220,15 +239,15 @@ void uartTaskFxn(UArg arg0, UArg arg1) {
            if(message2[0] == '.' || message2[0] == '-' || message2[0] == ' '){
                //UART_write(uart, message2, strlen(message2)+1);
                  if(message2[0] == '.'){
-                    note(buzzerHandle, A4, quart);
+                    note(buzzerHandle, A4, eigth);
                 }
                 else if(message2[0] == '-'){
-                    note(buzzerHandle, A4, half);
+                    note(buzzerHandle, A4, quart);
                 }
                sprintf(message2, "%c\r\n", '0');
            }
         }
-        Task_sleep(500000 / Clock_tickPeriod);
+        Task_sleep(200000 / Clock_tickPeriod);
     }
 }
 
@@ -304,6 +323,8 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
     // Task variables
     Task_Handle sensorTaskHandle;
     Task_Params sensorTaskParams;
+    Task_Handle jukeboxHandle;
+    Task_Params jukeboxParams;
     Task_Handle uartTaskHandle;
     Task_Params uartTaskParams;
 
@@ -345,6 +366,17 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
     if (PIN_registerIntCb(buttonHandle, &buttonFxn) != 0) {
         System_abort("Error registering button callback function");
     }
+    buttonHandle2 = PIN_open(&buttonState2, buttonConfig2);
+    if (!buttonHandle2)
+    {
+        System_abort("Error initializing button pin2\n");    
+    }
+    if (PIN_registerIntCb(buttonHandle2, &buttonFxn2))
+    {
+        System_abort("Error registering button callback function 2");    
+    }
+    
+    
 
     Task_Params_init(&uartTaskParams);
     uartTaskParams.stackSize = STACKSIZE;
@@ -354,6 +386,17 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
     if (uartTaskHandle == NULL) {
         System_abort("Task create failed!");
     }
+
+    Task_Params_init(&jukeboxParams);
+    jukeboxParams.stackSize = STACKSIZE;
+    jukeboxParams.stack = &jukeboxStack;
+    jukeboxParams.priority = 2;
+    jukeboxHandle = Task_create(jukeboxFxn, &jukeboxParams, NULL);
+    if (jukeboxHandle == NULL)
+    {
+        System_abort("Task create failed!");
+    }
+    
 
     /* Sanity check */
     System_printf("Hello world!\n");
