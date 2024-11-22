@@ -126,7 +126,6 @@ static const I2CCC26XX_I2CPinCfg i2cMPUCfg = {
 Char sensorTaskStack[STACKSIZE];
 Char uartTaskStack[STACKSIZE];
 uint8_t uartBuffer[1];
-char message2[4];
 
 enum state { WAITING=1,
     INTERPRETING
@@ -138,6 +137,7 @@ float x1, y1, z1, x2, y2, z2;
 int hz = 5000;
 
 char message[4];
+char message2[4];
 
 // not in use yet
 void printMessage(uint8_t* message){
@@ -225,7 +225,13 @@ void uartTaskFxn(UArg arg0, UArg arg1) {
             }
         } else if (programState == WAITING) {
            if(message2[0] == '.' || message2[0] == '-' || message2[0] == ' '){
-               UART_write(uart, message2, strlen(message2)+1);
+               //UART_write(uart, message2, strlen(message2)+1);
+                 if(message2[0] == '.'){
+                    note(buzzerHandle, A4, quart);
+                }
+                else if(message2[0] == '-'){
+                    note(buzzerHandle, A4, half);
+                }
                sprintf(message2, "%c\r\n", '0');
            }
         }
