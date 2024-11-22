@@ -184,8 +184,7 @@ void uWrite(UART_Handle handle, void *rxBuf, size_t len){
 
 void uartFxn(UART_Handle handle, void *rxBuf, size_t len){
     if((strcmp(rxBuf," ") == 0) || (strcmp(rxBuf,"-") == 0) || (strcmp(rxBuf,".") == 0)){
-        char c = '.';
-        sprintf(message2, "%c\r\n", c);
+        sprintf(message2, "%c\r\n", uartBuffer[0]);
         //create message string using rxBuf value
     }
     UART_read(handle, rxBuf, 1);
