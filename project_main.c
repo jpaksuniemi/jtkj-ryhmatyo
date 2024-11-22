@@ -177,11 +177,6 @@ void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
     System_flush();
 }
 
-void uWrite(UART_Handle handle, void *rxBuf, size_t len){
-    UART_write(handle, rxBuf, 1);
-
-}
-
 void uartFxn(UART_Handle handle, void *rxBuf, size_t len){
     if((strcmp(rxBuf," ") == 0) || (strcmp(rxBuf,"-") == 0) || (strcmp(rxBuf,".") == 0)){
         sprintf(message2, "%c\r\n", uartBuffer[0]);
@@ -219,7 +214,6 @@ void uartTaskFxn(UArg arg0, UArg arg1) {
         if (programState == INTERPRETING){
             if(message[0] != '\0'){
                 UART_write(uart, message, strlen(message)+1);
-                //memset(message, '\0', 4);
                 sprintf(message, "%c\r\n", '\0');
             }
         } else if (programState == WAITING) {
@@ -228,7 +222,7 @@ void uartTaskFxn(UArg arg0, UArg arg1) {
                sprintf(message2, "%c\r\n", '0');
            }
         }
-        Task_sleep(1000000 / Clock_tickPeriod);
+        Task_sleep(500000 / Clock_tickPeriod);
     }
 }
 
