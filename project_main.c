@@ -390,7 +390,7 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
     Task_Params_init(&jukeboxParams);
     jukeboxParams.stackSize = STACKSIZE;
     jukeboxParams.stack = &jukeboxStack;
-    jukeboxParams.priority = 2;
+    jukeboxParams.priority = 1;
     jukeboxHandle = Task_create(jukeboxFxn, &jukeboxParams, NULL);
     if (jukeboxHandle == NULL)
     {

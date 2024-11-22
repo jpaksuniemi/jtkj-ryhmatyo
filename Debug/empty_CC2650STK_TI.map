@@ -1,7 +1,7 @@
 ******************************************************************************
                   TI ARM Linker Unix v20.2.5                   
 ******************************************************************************
->> Linked Fri Nov 22 13:58:31 2024
+>> Linked Fri Nov 22 14:20:22 2024
 
 OUTPUT FILE NAME:   <empty_CC2650STK_TI.out>
 ENTRY POINT SYMBOL: "ResetISR"  address: 000078e1
