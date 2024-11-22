@@ -126,6 +126,7 @@ static const I2CCC26XX_I2CPinCfg i2cMPUCfg = {
 Char sensorTaskStack[STACKSIZE];
 Char uartTaskStack[STACKSIZE];
 uint8_t uartBuffer[1];
+char message2[4];
 
 enum state { WAITING=1,
     INTERPRETING
@@ -182,9 +183,13 @@ void uWrite(UART_Handle handle, void *rxBuf, size_t len){
 }
 
 void uartFxn(UART_Handle handle, void *rxBuf, size_t len){
-    //UART_write(handle, rxBuf, 1);
-    uWrite(handle, rxBuf, len);
+    if((strcmp(rxBuf," ") == 0) || (strcmp(rxBuf,"-") == 0) || (strcmp(rxBuf,".") == 0)){
+        char c = '.';
+        sprintf(message2, "%c\r\n", c);
+        //create message string using rxBuf value
+    }
     UART_read(handle, rxBuf, 1);
+    return;
 }
 
 /* Task Functions */
@@ -214,12 +219,15 @@ void uartTaskFxn(UArg arg0, UArg arg1) {
     while (1) {
         if (programState == INTERPRETING){
             if(message[0] != '\0'){
-                UART_write(uart, message, 4);
-                memset(message, '\0', 4);
+                UART_write(uart, message, strlen(message)+1);
+                //memset(message, '\0', 4);
+                sprintf(message, "%c\r\n", '\0');
             }
         } else if (programState == WAITING) {
-           // UART_write(uart, uartBuffer, 4);
-           // test that didn't work
+           if(message2[0] == '.' || message2[0] == '-' || message2[0] == ' '){
+               UART_write(uart, message2, strlen(message2)+1);
+               sprintf(message2, "%c\r\n", '0');
+           }
         }
         Task_sleep(1000000 / Clock_tickPeriod);
     }
